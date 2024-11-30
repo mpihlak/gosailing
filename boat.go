@@ -1,17 +1,20 @@
 package gosailing
 
 import (
+	"math"
+
 	"github.com/gopxl/pixel/v2"
 	"github.com/gopxl/pixel/v2/ext/imdraw"
 	"golang.org/x/image/colornames"
 )
 
 type Boat struct {
-	currentX      float64
-	currentY      float64
-	heading       float64
-	windDirection float64
-	boat          *imdraw.IMDraw
+	currentX       float64
+	currentY       float64
+	heading        float64
+	windDirection  float64
+	sailedDistance float64
+	boat           *imdraw.IMDraw
 }
 
 func NewBoat(currentX, currentY, windDirection float64) *Boat {
@@ -48,12 +51,17 @@ func (b *Boat) Tack() {
 
 func (b *Boat) Advance() {
 	newX, newY := RotatePoint(b.currentX, b.currentY+1, b.currentX, b.currentY, b.heading)
+	b.sailedDistance += math.Hypot(b.currentX-newX, b.currentY+newY)
 	b.currentX = newX
 	b.currentY = newY
 }
 
 func (b *Boat) GetXY() (float64, float64) {
 	return b.currentX, b.currentY
+}
+
+func (b *Boat) GetSailedDistance() float64 {
+	return b.sailedDistance
 }
 
 func (b *Boat) Drawable() *imdraw.IMDraw {

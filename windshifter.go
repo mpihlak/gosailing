@@ -2,14 +2,13 @@ package gosailing
 
 import (
 	"math"
-	"time"
 )
 
 type WindShifter struct {
 	baseDirection float64
 	amplitude     float64
 	period        float64
-	startTime     time.Time
+	clock         float64
 }
 
 func NewWindShifter(baseDirection, amplitude, period float64) *WindShifter {
@@ -17,12 +16,11 @@ func NewWindShifter(baseDirection, amplitude, period float64) *WindShifter {
 		baseDirection: baseDirection,
 		amplitude:     amplitude,
 		period:        period,
-		startTime:     time.Now(),
 	}
 }
 
 func (ws *WindShifter) GetWindDirection() float64 {
-	elapsed := time.Since(ws.startTime).Seconds()
-	shift := ws.amplitude * math.Sin(2*math.Pi*elapsed/ws.period)
+	shift := ws.amplitude * math.Sin(2*math.Pi*ws.clock/ws.period)
+	ws.clock += 0.05
 	return ws.baseDirection + shift
 }
