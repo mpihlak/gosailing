@@ -23,6 +23,7 @@ type SailRace struct {
 	paused     bool
 	started    bool
 	finished   bool
+	laylines   bool
 	race       *imdraw.IMDraw
 }
 
@@ -34,6 +35,7 @@ func NewSailRace(markLocationX, markLocationY, boatLocationX, boatLocationY floa
 		wind:       windShifter,
 		track:      NewTrackPlotter(boatLocationX, boatLocationY),
 		delayMs:    50,
+		laylines:   true,
 	}
 }
 
@@ -67,6 +69,15 @@ func (sr *SailRace) TackBoat() {
 			sr.lastTack = time.Now()
 		}
 	}
+}
+
+func (sr *SailRace) ToggleLaylines() {
+	sr.boat.ToggleLaylines()
+	sr.raceCourse.ToggleLaylines()
+}
+
+func (sr *SailRace) ToggleWindDirection() {
+	sr.raceCourse.ToggleWindDirection()
 }
 
 func (sr *SailRace) Throttle() {
@@ -106,6 +117,9 @@ func (sr *SailRace) Update(win *opengl.Window) {
 		}
 		fmt.Fprintf(basicTxt, "TWD: %03.0f\n", twd)
 		hdg := -sr.boat.heading
+		if hdg < 0 {
+			hdg += 360
+		}
 		fmt.Fprintf(basicTxt, "HDG: %03.0f\n", hdg)
 
 		if sr.finished {
@@ -134,6 +148,8 @@ func (sr *SailRace) Update(win *opengl.Window) {
 			"'q' quits",
 			"'t' tacks'",
 			"'r' restarts'",
+			"'l' toggle laylines",
+			"'w' toggle wind",
 			"'1' increases speed'",
 			"'2' decreases speed'",
 		}

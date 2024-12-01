@@ -75,6 +75,12 @@ func run() {
 		if win.Pressed(pixel.KeyR) {
 			sailRace = newSailRace()
 		}
+		if win.Pressed(pixel.KeyL) {
+			sailRace.ToggleLaylines()
+		}
+		if win.Pressed(pixel.KeyW) {
+			sailRace.ToggleWindDirection()
+		}
 
 		win.Clear(colornames.Lightblue)
 		sailRace.Update(win)

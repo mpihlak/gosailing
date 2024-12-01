@@ -14,6 +14,7 @@ type Boat struct {
 	heading        float64
 	windDirection  float64
 	sailedDistance float64
+	laylines       bool
 	boat           *imdraw.IMDraw
 }
 
@@ -26,6 +27,7 @@ func NewBoat(currentX, currentY, windDirection float64) *Boat {
 		currentY:      currentY,
 		heading:       heading,
 		windDirection: windDirection,
+		laylines:      true,
 		boat:          imdraw.New(nil),
 	}
 }
@@ -47,6 +49,10 @@ func (b *Boat) Tack() {
 	} else {
 		b.heading = b.windDirection - TackAngle
 	}
+}
+
+func (b *Boat) ToggleLaylines() {
+	b.laylines = !b.laylines
 }
 
 func (b *Boat) Advance() {
@@ -83,16 +89,18 @@ func (b *Boat) Drawable() *imdraw.IMDraw {
 	b.boat.Polygon(2)
 
 	// Starboard layline
-	b.boat.Color = colornames.Green
-	sbLayLineX, sbLayLineY := RotatePoint(b.currentX, b.currentY+1000, b.currentX, b.currentY, b.windDirection-TackAngle)
-	b.boat.Push(pixel.V(b.currentX, b.currentY), pixel.V(sbLayLineX, sbLayLineY))
-	b.boat.Line(2)
+	if b.laylines {
+		b.boat.Color = colornames.Green
+		sbLayLineX, sbLayLineY := RotatePoint(b.currentX, b.currentY+1000, b.currentX, b.currentY, b.windDirection-TackAngle)
+		b.boat.Push(pixel.V(b.currentX, b.currentY), pixel.V(sbLayLineX, sbLayLineY))
+		b.boat.Line(2)
 
-	// Port layline
-	b.boat.Color = colornames.Red
-	portLayLineX, portLayLineY := RotatePoint(b.currentX, b.currentY+1000, b.currentX, b.currentY, b.windDirection+TackAngle)
-	b.boat.Push(pixel.V(b.currentX, b.currentY), pixel.V(portLayLineX, portLayLineY))
-	b.boat.Line(2)
+		// Port layline
+		b.boat.Color = colornames.Red
+		portLayLineX, portLayLineY := RotatePoint(b.currentX, b.currentY+1000, b.currentX, b.currentY, b.windDirection+TackAngle)
+		b.boat.Push(pixel.V(b.currentX, b.currentY), pixel.V(portLayLineX, portLayLineY))
+		b.boat.Line(2)
+	}
 
 	return b.boat
 }
