@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/gopxl/pixel/v2"
 	"github.com/gopxl/pixel/v2/backends/opengl"
@@ -56,29 +57,39 @@ func run() {
 
 	sailRace := newSailRace()
 
+	// Throttle the keyboard to avoid registering unintended repeated keypresses
+	lastKeyPressed := make(map[pixel.Button]time.Time)
+	keyPressed := func(k pixel.Button) bool {
+		if win.Pressed(k) && time.Since(lastKeyPressed[k]) > 200*time.Millisecond {
+			lastKeyPressed[k] = time.Now()
+			return true
+		}
+		return false
+	}
+
 	for !win.Closed() {
-		if win.Pressed(pixel.KeyQ) || win.Pressed(pixel.KeyEscape) {
+		if keyPressed(pixel.KeyQ) || win.Pressed(pixel.KeyEscape) {
 			break
 		}
-		if win.Pressed(pixel.Key1) {
+		if keyPressed(pixel.Key1) {
 			sailRace.IncreaseSpeed()
 		}
-		if win.Pressed(pixel.Key2) {
+		if keyPressed(pixel.Key2) {
 			sailRace.DecreaseSpeed()
 		}
-		if win.Pressed(pixel.KeySpace) {
+		if keyPressed(pixel.KeySpace) {
 			sailRace.TogglePause()
 		}
-		if win.Pressed(pixel.KeyT) {
+		if keyPressed(pixel.KeyT) {
 			sailRace.TackBoat()
 		}
-		if win.Pressed(pixel.KeyR) {
+		if keyPressed(pixel.KeyR) {
 			sailRace = newSailRace()
 		}
-		if win.Pressed(pixel.KeyL) {
+		if keyPressed(pixel.KeyL) {
 			sailRace.ToggleLaylines()
 		}
-		if win.Pressed(pixel.KeyW) {
+		if keyPressed(pixel.KeyW) {
 			sailRace.ToggleWindDirection()
 		}
 

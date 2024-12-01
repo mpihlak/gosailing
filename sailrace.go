@@ -57,9 +57,6 @@ func (sr *SailRace) TogglePause() {
 	} else {
 		sr.StartRace()
 	}
-
-	// Small delay to eat the keypress
-	time.Sleep(200 * time.Millisecond)
 }
 
 func (sr *SailRace) TackBoat() {
