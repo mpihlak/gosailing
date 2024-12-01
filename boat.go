@@ -66,9 +66,21 @@ func (b *Boat) GetSailedDistance() float64 {
 
 func (b *Boat) Drawable() *imdraw.IMDraw {
 	b.boat.Clear()
+
+	// Draw a little triangle for the boat
 	b.boat.Color = colornames.Darkblue
-	b.boat.Push(pixel.V(b.currentX, b.currentY))
-	b.boat.Circle(10.0, 5)
+	// bow
+	bowX, bowY := RotatePoint(b.currentX, b.currentY+7.5, b.currentX, b.currentY, b.heading)
+	b.boat.Push(pixel.V(bowX, bowY))
+	// aft starboard corner
+	sbX, sbY := RotatePoint(b.currentX+5, b.currentY-7.5, b.currentX, b.currentY, b.heading)
+	b.boat.Push(pixel.V(sbX, sbY))
+	// aft port corner
+	pX, pY := RotatePoint(b.currentX-5, b.currentY-7.5, b.currentX, b.currentY, b.heading)
+	b.boat.Push(pixel.V(pX, pY))
+	// back to bow
+	b.boat.Push(pixel.V(bowX, bowY))
+	b.boat.Polygon(2)
 
 	// Starboard layline
 	b.boat.Color = colornames.Green

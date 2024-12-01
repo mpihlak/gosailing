@@ -31,7 +31,7 @@ func NewSailRace(markLocationX, markLocationY, boatLocationX, boatLocationY, win
 		raceCourse: NewRaceCourse(markLocationX, markLocationY, windDirection),
 		boat:       NewBoat(boatLocationX, boatLocationY, windDirection),
 		wind:       NewWindShifter(windDirection, 10.0, 10),
-		track:      NewTrackPlotter(),
+		track:      NewTrackPlotter(boatLocationX, boatLocationY),
 		delayMs:    50,
 	}
 }

@@ -1,7 +1,7 @@
 package gosailing
 
 import (
-	"time"
+	"math"
 
 	"github.com/gopxl/pixel/v2"
 	"github.com/gopxl/pixel/v2/ext/imdraw"
@@ -9,22 +9,27 @@ import (
 )
 
 type TrackPlotter struct {
-	track        *imdraw.IMDraw
-	lastPlotTime time.Time
+	track    *imdraw.IMDraw
+	plottedX float64
+	plottedY float64
 }
 
-func NewTrackPlotter() *TrackPlotter {
+func NewTrackPlotter(x, y float64) *TrackPlotter {
 	return &TrackPlotter{
-		track: imdraw.New(nil),
+		plottedX: x,
+		plottedY: y,
+		track:    imdraw.New(nil),
 	}
 }
 
 func (tp *TrackPlotter) PlotLocation(x, y float64) {
-	if time.Since(tp.lastPlotTime) > 100*time.Millisecond {
+	distance := math.Hypot(tp.plottedX-x, tp.plottedY-y)
+	if distance > 5 {
 		tp.track.Color = colornames.Blueviolet
-		tp.track.Push(pixel.V(x, y))
-		tp.track.Circle(2, 1)
-		tp.lastPlotTime = time.Now()
+		tp.track.Push(pixel.V(tp.plottedX, tp.plottedY))
+		tp.track.Circle(1, 1)
+		tp.plottedX = x
+		tp.plottedY = y
 	}
 }
 

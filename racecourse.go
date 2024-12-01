@@ -36,6 +36,17 @@ func (rc *RaceCourse) Drawable() *imdraw.IMDraw {
 	// Port layline
 	rc.course.Clear()
 
+	// Flag of the mark
+	rc.course.Color = colornames.Orangered
+	rc.course.Push(pixel.V(rc.MarkX, rc.MarkY), pixel.V(rc.MarkX, rc.MarkY+10))
+	rc.course.Line(2)
+	rc.course.Push(pixel.V(rc.MarkX, rc.MarkY+10), pixel.V(rc.MarkX, rc.MarkY+20))
+	rc.course.Push(pixel.V(rc.MarkX, rc.MarkY+10), pixel.V(rc.MarkX+10, rc.MarkY+15))
+	rc.course.Push(pixel.V(rc.MarkX, rc.MarkY+20), pixel.V(rc.MarkX+10, rc.MarkY+15))
+	rc.course.Line(2)
+	rc.course.Push(pixel.V(rc.MarkX, rc.MarkY))
+	rc.course.Circle(2, 2)
+
 	rc.course.Color = colornames.Red
 	portX, portY := RotatePoint(rc.MarkX, 0, rc.MarkX, rc.MarkY, -TackAngle+rc.windDirection)
 	rc.course.Push(pixel.V(rc.MarkX, rc.MarkY), pixel.V(portX, portY))
