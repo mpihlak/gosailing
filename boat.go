@@ -51,7 +51,7 @@ func (b *Boat) Tack() {
 
 func (b *Boat) Advance() {
 	newX, newY := RotatePoint(b.currentX, b.currentY+1, b.currentX, b.currentY, b.heading)
-	b.sailedDistance += math.Hypot(b.currentX-newX, b.currentY+newY)
+	b.sailedDistance += math.Hypot(b.currentX-newX, b.currentY-newY)
 	b.currentX = newX
 	b.currentY = newY
 }

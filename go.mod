@@ -13,5 +13,6 @@ require (
 	github.com/go-gl/mathgl v1.1.0 // indirect
 	github.com/gopxl/glhf/v2 v2.0.0 // indirect
 	github.com/gopxl/mainthread/v2 v2.1.1 // indirect
+	github.com/gopxl/pixel v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 )
