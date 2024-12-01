@@ -16,7 +16,7 @@ import (
 type SailRace struct {
 	raceCourse *RaceCourse
 	boat       *Boat
-	wind       *WindShifter
+	wind       WindShifter
 	track      *TrackPlotter
 	lastTack   time.Time
 	delayMs    int
@@ -26,11 +26,12 @@ type SailRace struct {
 	race       *imdraw.IMDraw
 }
 
-func NewSailRace(markLocationX, markLocationY, boatLocationX, boatLocationY, windDirection float64) *SailRace {
+func NewSailRace(markLocationX, markLocationY, boatLocationX, boatLocationY float64, windShifter WindShifter) *SailRace {
+	wd := windShifter.GetWindDirection()
 	return &SailRace{
-		raceCourse: NewRaceCourse(markLocationX, markLocationY, windDirection),
-		boat:       NewBoat(boatLocationX, boatLocationY, windDirection),
-		wind:       NewWindShifter(windDirection, 10.0, 10),
+		raceCourse: NewRaceCourse(markLocationX, markLocationY, wd),
+		boat:       NewBoat(boatLocationX, boatLocationY, wd),
+		wind:       windShifter,
 		track:      NewTrackPlotter(boatLocationX, boatLocationY),
 		delayMs:    50,
 	}
@@ -51,12 +52,12 @@ func (sr *SailRace) DecreaseSpeed() {
 func (sr *SailRace) TogglePause() {
 	if sr.started {
 		sr.paused = !sr.paused
-
-		// Small delay to eat the keypress
-		time.Sleep(200 * time.Millisecond)
 	} else {
 		sr.StartRace()
 	}
+
+	// Small delay to eat the keypress
+	time.Sleep(200 * time.Millisecond)
 }
 
 func (sr *SailRace) TackBoat() {
@@ -99,6 +100,14 @@ func (sr *SailRace) Update(win *opengl.Window) {
 		distanceToMark := math.Hypot(currentBoatX-sr.raceCourse.MarkX, currentBoatY-sr.raceCourse.MarkY)
 		fmt.Fprintf(basicTxt, "Sailed distance:  %.2f\n", sr.boat.GetSailedDistance())
 		fmt.Fprintf(basicTxt, "Distance to mark: %.2f\n", distanceToMark)
+		twd := sr.boat.windDirection
+		if twd < 0 {
+			twd = 360 + twd
+		}
+		fmt.Fprintf(basicTxt, "TWD: %03.0f\n", twd)
+		hdg := -sr.boat.heading
+		fmt.Fprintf(basicTxt, "HDG: %03.0f\n", hdg)
+
 		if sr.finished {
 			basicTxt.Color = colornames.Darkblue
 			fmt.Fprintln(basicTxt, "FINISHED!")

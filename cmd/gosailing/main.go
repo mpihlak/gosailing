@@ -1,6 +1,9 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+
 	"github.com/gopxl/pixel/v2"
 	"github.com/gopxl/pixel/v2/backends/opengl"
 	"golang.org/x/image/colornames"
@@ -19,9 +22,13 @@ const (
 	boatLocationY = 25
 )
 
+var (
+	windData = flag.String("windData", "", "Wind data file")
+)
+
 func run() {
 	cfg := opengl.WindowConfig{
-		Title:  "Go sailing!",
+		Title:  "Go Sailing!",
 		Bounds: pixel.R(0, 0, maxWidth, maxHeight),
 		VSync:  true,
 	}
@@ -31,10 +38,19 @@ func run() {
 	}
 
 	newSailRace := func() *gosailing.SailRace {
+		var windShifter gosailing.WindShifter
+		if *windData != "" {
+			fmt.Printf("Using wind data from %v\n", *windData)
+			windShifter = gosailing.NewReplayShifter(*windData)
+		} else {
+			fmt.Printf("Generating oscillating wind")
+			windShifter = gosailing.NewOscillatingWindShifter(windDirection, 10.0, 10)
+		}
+
 		return gosailing.NewSailRace(
 			markLocationX, markLocationY,
 			boatLocationX, boatLocationY,
-			windDirection,
+			windShifter,
 		)
 	}
 
@@ -69,5 +85,6 @@ func run() {
 }
 
 func main() {
+	flag.Parse()
 	opengl.Run(run)
 }
