@@ -108,6 +108,7 @@ func (sr *SailRace) Update(win *opengl.Window) {
 		distanceToMark := math.Hypot(currentBoatX-sr.raceCourse.MarkX, currentBoatY-sr.raceCourse.MarkY)
 		fmt.Fprintf(basicTxt, "Sailed distance:  %.2f\n", sr.boat.GetSailedDistance())
 		fmt.Fprintf(basicTxt, "Distance to mark: %.2f\n", distanceToMark)
+
 		twd := sr.boat.windDirection
 		if twd < 0 {
 			twd = 360 + twd
@@ -118,18 +119,25 @@ func (sr *SailRace) Update(win *opengl.Window) {
 			hdg += 360
 		}
 		fmt.Fprintf(basicTxt, "HDG: %03.0f\n", hdg)
+		basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 
 		if sr.finished {
+			textX := windowBounds.Center().X - 100
+			textY := windowBounds.Center().Y
+
+			basicTxt := text.New(pixel.V(textX, textY), basicAtlas)
+
 			basicTxt.Color = colornames.Darkblue
 			fmt.Fprintln(basicTxt, "FINISHED!")
 
 			if currentBoatX < sr.raceCourse.MarkX {
 				basicTxt.Color = colornames.Red
 				fmt.Fprintln(basicTxt, "Wrong side of the mark!")
+			} else {
+				fmt.Fprintf(basicTxt, "SCORE: %.2f\n", sr.boat.GetSailedDistance()+distanceToMark)
 			}
+			basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 		}
-
-		basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 	}
 
 	sr.boat.Drawable().Draw(win)
