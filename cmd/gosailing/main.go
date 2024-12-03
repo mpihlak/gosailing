@@ -16,7 +16,6 @@ const (
 	maxWidth  = 1024.0
 	maxHeight = 768.0
 
-	windDirection = 0.0 // 0 is north, 90 is east and so on
 	markLocationX = maxWidth / 2
 	markLocationY = maxHeight - 50
 	boatLocationX = maxWidth / 2
@@ -24,7 +23,10 @@ const (
 )
 
 var (
-	windData = flag.String("windData", "", "Wind data file")
+	windData      = flag.String("windData", "", "Wind data file")
+	windAmplitude = flag.Float64("windShiftAmplitude", 10.0, "Amplitude of the wind shifts degrees")
+	windDirection = flag.Float64("windDirection", 0.0, "Starting wind direction degrees")
+	windShiftRate = flag.Float64("windShiftRate", 0.0, "Degrees per cycle to shift wind")
 )
 
 func run() {
@@ -44,8 +46,8 @@ func run() {
 			fmt.Printf("Using wind data from %v\n", *windData)
 			windShifter = gosailing.NewReplayShifter(*windData)
 		} else {
-			fmt.Printf("Generating oscillating wind")
-			windShifter = gosailing.NewOscillatingWindShifter(windDirection, 10.0, 10)
+			fmt.Printf("Generating oscillating wind\n")
+			windShifter = gosailing.NewOscillatingWindShifter(*windDirection, *windAmplitude, 10, *windShiftRate)
 		}
 
 		return gosailing.NewSailRace(

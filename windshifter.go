@@ -86,19 +86,22 @@ type OscillatingWindShifter struct {
 	baseDirection float64
 	amplitude     float64
 	period        float64
+	shiftRate     float64
 	clock         float64
 }
 
-func NewOscillatingWindShifter(baseDirection, amplitude, period float64) *OscillatingWindShifter {
+func NewOscillatingWindShifter(baseDirection, amplitude, period, shiftRate float64) *OscillatingWindShifter {
 	return &OscillatingWindShifter{
 		baseDirection: baseDirection,
 		amplitude:     amplitude,
 		period:        period,
+		shiftRate:     shiftRate,
 	}
 }
 
 func (ws *OscillatingWindShifter) GetWindDirection() float64 {
 	shift := ws.amplitude * math.Sin(2*math.Pi*ws.clock/ws.period)
 	ws.clock += 0.05
+	ws.baseDirection += ws.shiftRate
 	return ws.baseDirection + shift
 }
