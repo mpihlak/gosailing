@@ -26,6 +26,9 @@ func TestReplayNavigationDataProvider(t *testing.T) {
 	require.Equal(float64(78), d.Heading)
 	require.Equal(float64(5.5), d.SpeedThroughWater)
 	require.Equal(float64(45.79), d.TrueWindAngle)
+	require.Equal(float64(13.0), d.TrueWindSpeed)
+	require.Equal(float64(59.488683), d.Latitude)
+	require.Equal(float64(24.798672), d.Longitude)
 	require.Equal(float64(55), d.CumulativeDistance)
 
 	d, ok = ds.Next()
