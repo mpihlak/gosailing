@@ -43,6 +43,10 @@ func (sr *SailRace) StartRace() {
 	sr.started = true
 }
 
+func (sr *SailRace) IsFinished() bool {
+	return sr.finished
+}
+
 func (sr *SailRace) IncreaseSpeed() {
 	sr.delayMs = max(0, sr.delayMs-10)
 }
@@ -109,7 +113,7 @@ func (sr *SailRace) Update(win *opengl.Window) {
 		fmt.Fprintf(basicTxt, "Sailed distance:  %.2f\n", sr.boat.GetSailedDistance())
 		fmt.Fprintf(basicTxt, "Distance to mark: %.2f\n", distanceToMark)
 
-		twd := sr.boat.windDirection
+		twd := -sr.raceCourse.windDirection
 		if twd < 0 {
 			twd = 360 + twd
 		}
@@ -128,13 +132,10 @@ func (sr *SailRace) Update(win *opengl.Window) {
 			basicTxt := text.New(pixel.V(textX, textY), basicAtlas)
 
 			basicTxt.Color = colornames.Darkblue
-			fmt.Fprintln(basicTxt, "FINISHED!")
-
+			fmt.Fprintf(basicTxt, "TOTAL DISTANCE: %.2f\n", sr.boat.GetSailedDistance()+distanceToMark)
 			if currentBoatX < sr.raceCourse.MarkX {
 				basicTxt.Color = colornames.Red
 				fmt.Fprintln(basicTxt, "Wrong side of the mark!")
-			} else {
-				fmt.Fprintf(basicTxt, "SCORE: %.2f\n", sr.boat.GetSailedDistance()+distanceToMark)
 			}
 			basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 		}

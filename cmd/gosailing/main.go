@@ -80,13 +80,19 @@ func run() {
 			sailRace.DecreaseSpeed()
 		}
 		if keyPressed(pixel.KeySpace) {
-			sailRace.TogglePause()
+			if sailRace.IsFinished() {
+				sailRace = newSailRace()
+				sailRace.StartRace()
+			} else {
+				sailRace.TogglePause()
+			}
 		}
 		if keyPressed(pixel.KeyT) {
 			sailRace.TackBoat()
 		}
 		if keyPressed(pixel.KeyR) {
 			sailRace = newSailRace()
+			sailRace.StartRace()
 		}
 		if keyPressed(pixel.KeyL) {
 			sailRace.ToggleLaylines()

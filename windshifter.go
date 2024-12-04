@@ -73,6 +73,7 @@ func NewReplayShifter(fileName string) *ReplayWindShifter {
 	}
 }
 
+// TODO: Use the commonly understood wind direction, ie. where is it blowing from
 func (r *ReplayWindShifter) GetWindDirection() float64 {
 	val := r.windDirections[int(r.pos)]
 	r.pos = r.pos + 0.05
