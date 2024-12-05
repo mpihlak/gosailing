@@ -43,3 +43,33 @@ func LayLine(canvas *imdraw.IMDraw, x, y, heading float64, color color.RGBA) {
 	canvas.Push(pixel.V(x, y), pixel.V(starboardX, starboardY))
 	canvas.Line(2)
 }
+
+func DrawWindDirection(canvas *imdraw.IMDraw, x, y, heading float64) {
+	windDirection := -heading
+
+	canvas.Color = colornames.Gray
+	canvas.Push(pixel.V(x, y))
+	canvas.Circle(30, 2)
+
+	lineX := x
+	lineTopY := y + 25
+	lineBottomY := y - 25
+
+	// Wind direction line
+	startX, startY := RotatePoint(lineX, lineTopY, x, y, windDirection)
+	endX, endY := RotatePoint(lineX, lineBottomY, x, y, windDirection)
+	canvas.Push(pixel.V(startX, startY), pixel.V(endX, endY))
+
+	// Arrowhead
+	arrowTipX := lineX
+	arrowTipY := lineBottomY
+	arrowLeftY := lineBottomY + 5
+	arrowLeftX := lineX - 5
+	arrowRightX := lineX + 5
+	arrowRightY := lineBottomY + 5
+	canvas.Push(pixel.V(RotatePoint(arrowLeftX, arrowLeftY, x, y, windDirection)))
+	canvas.Push(pixel.V(RotatePoint(arrowTipX, arrowTipY, x, y, windDirection)))
+	canvas.Push(pixel.V(RotatePoint(arrowRightX, arrowRightY, x, y, windDirection)))
+
+	canvas.Line(2)
+}
