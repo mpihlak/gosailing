@@ -45,7 +45,7 @@ func LayLine(canvas *imdraw.IMDraw, x, y, heading float64, color color.RGBA) {
 }
 
 func DrawWindDirection(canvas *imdraw.IMDraw, x, y, heading float64) {
-	windDirection := -heading
+	windDirection := heading
 
 	canvas.Color = colornames.Gray
 	canvas.Push(pixel.V(x, y))

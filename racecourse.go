@@ -82,5 +82,7 @@ func (rc *RaceCourse) Drawable() *imdraw.IMDraw {
 		rc.course.Line(1)
 	}
 
+	DrawWindDirection(rc.course, 1024-50, 768-50, -rc.windDirection)
+
 	return rc.course
 }

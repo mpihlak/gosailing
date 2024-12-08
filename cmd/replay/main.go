@@ -85,7 +85,6 @@ func run() {
 
 	zoom := 14000.0
 	minX, minY := gosailing.LatLngToScreen(minLat, minLng, zoom)
-	//maxX, maxY := gosailing.LatLngToScreen(maxLat, maxLng, zoom)
 	xOffset := minX - 50
 	yOffset := minY - 50
 
@@ -121,10 +120,10 @@ func run() {
 
 				x, y := gosailing.LatLngToScreen(d.Latitude, d.Longitude, zoom)
 
-				gosailing.DrawBoat(canvas, x-xOffset, y-yOffset, -d.CourseOverGround)
-				gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection+45+180, colornames.Green)
-				gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection-45+180, colornames.Red)
-				gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.CourseOverGround+180, colornames.Olive)
+				gosailing.DrawBoat(canvas, x-xOffset, y-yOffset, d.CourseOverGround)
+				gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection+45+180, colornames.Red)
+				gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection-45+180, colornames.Green)
+				gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.CourseOverGround+180, colornames.Gray)
 
 				gosailing.DrawWindDirection(canvas, 1024-50, 768-50, d.TrueWindDirection)
 
@@ -136,8 +135,8 @@ func run() {
 				if *markLat != 0 && *markLng != 0 {
 					x, y := gosailing.LatLngToScreen(*markLat, *markLng, zoom)
 					gosailing.DrawFlag(canvas, x-xOffset, y-yOffset)
-					gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection+45, colornames.Green)
-					gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection-45, colornames.Red)
+					gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection+45, colornames.Red)
+					gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection-45, colornames.Green)
 				}
 
 				time.Sleep(50 * time.Millisecond)

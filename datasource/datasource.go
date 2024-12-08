@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -188,4 +189,19 @@ func GetBounds(points []NavigationDataPoint) (minLat, maxLat, minLng, maxLng flo
 	}
 
 	return minLat, maxLat, minLng, maxLng
+}
+
+func MedianWindDirection(points []NavigationDataPoint) float64 {
+	windDirections := make([]float64, len(points))
+	for i, p := range points {
+		windDirections[i] = p.TrueWindDirection
+	}
+
+	sort.Float64s(windDirections)
+	n := len(windDirections)
+	medianWind := windDirections[n/2]
+	if len(windDirections)%2 == 0 {
+		medianWind = (windDirections[n/2] + windDirections[n/2+1]) / 2
+	}
+	return medianWind
 }
