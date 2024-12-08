@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -111,7 +110,7 @@ func run() {
 
 	zoom := 14000.0
 	minX, minY := gosailing.LatLngToScreen(minLat, minLng, zoom)
-	maxX, maxY := gosailing.LatLngToScreen(maxLat, maxLng, zoom)
+	//maxX, maxY := gosailing.LatLngToScreen(maxLat, maxLng, zoom)
 	xOffset := minX - 50
 	yOffset := minY - 50
 
@@ -119,19 +118,7 @@ func run() {
 	paused := false
 	currentIndex := 0
 	canvas := imdraw.New(nil)
-	backgroundCanvas := imdraw.New(nil)
-
-	// Draw a rectangle for the bounds
-	backgroundCanvas.Color = colornames.Gray
-	backgroundCanvas.Push(
-		pixel.V(minX, minY),
-		pixel.V(maxX, maxY),
-	)
-	backgroundCanvas.Rectangle(2)
-	if *markLat != 0 && *markLng != 0 {
-		x, y := gosailing.LatLngToScreen(*markLat, *markLng, zoom)
-		gosailing.DrawFlag(backgroundCanvas, x-xOffset, y-yOffset)
-	}
+	trackCanvas := imdraw.New(nil)
 
 	for !win.Closed() {
 		if keyPressed(pixel.KeyQ) || keyPressed(pixel.KeyEscape) {
@@ -155,20 +142,29 @@ func run() {
 				currentIndex++
 
 				canvas.Clear()
+
 				x, y := gosailing.LatLngToScreen(d.Latitude, d.Longitude, zoom)
-				fmt.Printf("heading: %f\n", d.Heading)
+
 				gosailing.DrawBoat(canvas, x-xOffset, y-yOffset, -d.CourseOverGround)
 				gosailing.DrawWindDirection(canvas, 1024-50, 768-50, d.TrueWindDirection)
 
-				backgroundCanvas.Color = colornames.Blue
-				backgroundCanvas.Push(pixel.V(x-xOffset, y-yOffset))
-				backgroundCanvas.Circle(2, 1)
+				// draw track
+				trackCanvas.Color = colornames.Blueviolet
+				trackCanvas.Push(pixel.V(x-xOffset, y-yOffset))
+				trackCanvas.Circle(1, 1)
+
+				if *markLat != 0 && *markLng != 0 {
+					x, y := gosailing.LatLngToScreen(*markLat, *markLng, zoom)
+					gosailing.DrawFlag(canvas, x-xOffset, y-yOffset)
+					gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection+45, colornames.Green)
+					gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection-45, colornames.Red)
+				}
 			}
 		}
 
 		win.Clear(colornames.Lightblue)
-		backgroundCanvas.Draw(win)
 		canvas.Draw(win)
+		trackCanvas.Draw(win)
 		win.Update()
 	}
 }
