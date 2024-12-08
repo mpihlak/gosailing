@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -82,8 +83,10 @@ func run() {
 
 	replayPoints := replayData.GetAllPoints()
 	minLat, _, minLng, _ := datasource.GetBounds(replayPoints)
+	medianWind := datasource.MedianWindDirection(replayPoints)
+	fmt.Printf("Median wind direction: %.2f\n", medianWind)
 
-	zoom := 14000.0
+	zoom := 16000.0
 	minX, minY := gosailing.LatLngToScreen(minLat, minLng, zoom)
 	xOffset := minX - 50
 	yOffset := minY - 50
