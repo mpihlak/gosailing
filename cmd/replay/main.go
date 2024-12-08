@@ -23,19 +23,37 @@ const (
 )
 
 var (
-	csvFile = flag.String("csv", "", "CSV data file to replay")
+	csvFile   = flag.String("csv", "", "CSV data file to replay")
+	startTime = flag.String("start", "", "Start time to replay from (RFC3339 format)")
+	endTime   = flag.String("end", "", "End time to replay to (RFC3339 format)")
 )
 
 func run() {
 	if *csvFile == "" {
 		log.Fatalf("Must provide -csv argument with replay file")
 	}
+
+	var start, end time.Time
+	var err error
+	if *startTime != "" {
+		start, err = time.Parse(time.RFC3339, *startTime)
+		if err != nil {
+			log.Fatalf("Invalid start time format: %v", err)
+		}
+	}
+	if *endTime != "" {
+		end, err = time.Parse(time.RFC3339, *endTime)
+		if err != nil {
+			log.Fatalf("Invalid end time format: %v", err)
+		}
+	}
+
 	f, err := os.Open(*csvFile)
 	if err != nil {
 		log.Fatalf("Unable to open CSV file: %v", err)
 	}
 
-	replayData, err := datasource.NewReplayNavigationDataProvider(f)
+	replayData, err := datasource.NewReplayNavigationDataProvider(f, &start, &end)
 	if err != nil {
 		log.Fatal("Unable to load replay")
 	}

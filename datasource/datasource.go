@@ -25,12 +25,14 @@ type NavigationDataProvider interface {
 }
 
 type ReplayNavigationDataProvider struct {
-	fieldMap map[string]int
-	records  [][]string
-	pos      int
+	startTime *time.Time
+	endTime   *time.Time
+	fieldMap  map[string]int
+	records   [][]string
+	pos       int
 }
 
-func NewReplayNavigationDataProvider(reader io.Reader) (*ReplayNavigationDataProvider, error) {
+func NewReplayNavigationDataProvider(reader io.Reader, startTime, endTime *time.Time) (*ReplayNavigationDataProvider, error) {
 	csvReader := csv.NewReader(reader)
 	records, err := csvReader.ReadAll()
 	if err != nil {
@@ -46,8 +48,10 @@ func NewReplayNavigationDataProvider(reader io.Reader) (*ReplayNavigationDataPro
 	}
 
 	return &ReplayNavigationDataProvider{
-		fieldMap: fieldMap,
-		records:  records[1:],
+		startTime: startTime,
+		endTime:   endTime,
+		fieldMap:  fieldMap,
+		records:   records[1:],
 	}, nil
 }
 
@@ -67,22 +71,51 @@ func (r *ReplayNavigationDataProvider) assignFieldValue(record []string, key str
 	return true
 }
 
-func (r *ReplayNavigationDataProvider) Next() (NavigationDataPoint, bool) {
-	var result NavigationDataPoint
-	if r.pos >= len(r.records) {
-		return result, false
+func (r *ReplayNavigationDataProvider) isTimeInRange(timestamp time.Time) bool {
+	if r.startTime != nil && timestamp.Before(*r.startTime) {
+		return false
+	}
+	if r.endTime != nil && timestamp.After(*r.endTime) {
+		return false
+	}
+	return true
+}
+
+func (r *ReplayNavigationDataProvider) getNextValidRecord() ([]string, time.Time, bool) {
+	timeFieldPos, ok := r.fieldMap["time"]
+	if !ok {
+		return nil, time.Time{}, false
 	}
 
-	fieldPos, ok := r.fieldMap["time"]
+	for r.pos < len(r.records) {
+		record := r.records[r.pos]
+		r.pos++
+
+		if r.pos >= len(r.records) {
+			return nil, time.Time{}, false
+		}
+
+		if timeFieldPos >= len(record) {
+			return nil, time.Time{}, false
+		}
+
+		parsedTime, err := time.Parse(time.RFC3339, record[timeFieldPos])
+		if err != nil {
+			return nil, time.Time{}, false
+		}
+
+		if r.isTimeInRange(parsedTime) {
+			return record, parsedTime, true
+		}
+	}
+
+	return nil, time.Time{}, false
+}
+
+func (r *ReplayNavigationDataProvider) Next() (NavigationDataPoint, bool) {
+	var result NavigationDataPoint
+	record, parsedTime, ok := r.getNextValidRecord()
 	if !ok {
-		return result, false
-	}
-	record := r.records[r.pos]
-	if fieldPos >= len(record) {
-		return result, false
-	}
-	parsedTime, err := time.Parse(time.RFC3339, record[fieldPos])
-	if err != nil {
 		return result, false
 	}
 
@@ -101,8 +134,6 @@ func (r *ReplayNavigationDataProvider) Next() (NavigationDataPoint, bool) {
 		r.assignFieldValue(record, "lat", &result.Latitude) &&
 		r.assignFieldValue(record, "lng", &result.Longitude) &&
 		r.assignFieldValue(record, "cum_dist", &result.CumulativeDistance)
-
-	r.pos++
 
 	return result, ok
 }

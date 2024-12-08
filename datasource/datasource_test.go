@@ -15,7 +15,7 @@ func TestReplayNavigationDataProvider(t *testing.T) {
 2024-09-11T17:27:52+03:00,22.5,288.65,31.999692858056477,17.5932,87.18125810710607,78,1.5999846429028237,5.851439999999999,5.5,-3.0997016716577535,-101.79741146089336,-20.597832734953094,24.798672,59.488683,13.00,45.79,132.25,4.079967736770225,0.0015914414543093099,55
 `
 	buf := bytes.NewBuffer([]byte(testData))
-	ds, err := NewReplayNavigationDataProvider(buf)
+	ds, err := NewReplayNavigationDataProvider(buf, nil, nil)
 	require.NoError(err)
 	require.NotNil(ds)
 
