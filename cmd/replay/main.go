@@ -29,6 +29,7 @@ var (
 	endTime   = flag.String("end", "", "End time to replay to (RFC3339 format)")
 	markLat   = flag.Float64("markLat", 0, "Latitude of the mark")
 	markLng   = flag.Float64("markLng", 0, "Longitude of the mark")
+	zoomLevel = flag.Float64("zoom", 5500, "Zoom level")
 )
 
 func run() {
@@ -89,9 +90,7 @@ func run() {
 	medianWind := datasource.MedianWindDirection(replayPoints)
 	fmt.Printf("Median wind direction: %.2f\n", medianWind)
 
-	zoom := 5500.0
-
-	markX, markY := gosailing.LatLngToScreen(*markLat, *markLng, zoom)
+	markX, markY := gosailing.LatLngToScreen(*markLat, *markLng, *zoomLevel)
 
 	type locationXY struct {
 		x float64
@@ -101,7 +100,7 @@ func run() {
 	locations := make([]locationXY, len(replayPoints))
 	var minX, minY, maxX, maxY float64
 	for i, p := range replayPoints {
-		x, y := gosailing.LatLngToScreen(p.Latitude, p.Longitude, zoom)
+		x, y := gosailing.LatLngToScreen(p.Latitude, p.Longitude, *zoomLevel)
 		if *markLat != 0 && *markLng != 0 {
 			x, y = gosailing.RotatePoint(x, y, markX, markY, -medianWind)
 		}
