@@ -35,6 +35,9 @@ func run() {
 	if *csvFile == "" {
 		log.Fatalf("Must provide -csv argument with replay file")
 	}
+	if *markLat == 0 || *markLng == 0 {
+		log.Fatalf("Must provide -markLat and -markLng arguments with mark location")
+	}
 
 	var start, end time.Time
 	var err error
@@ -82,13 +85,45 @@ func run() {
 	}
 
 	replayPoints := replayData.GetAllPoints()
-	minLat, _, minLng, _ := datasource.GetBounds(replayPoints)
+
 	medianWind := datasource.MedianWindDirection(replayPoints)
 	fmt.Printf("Median wind direction: %.2f\n", medianWind)
 
-	zoom := 16000.0
-	minX, minY := gosailing.LatLngToScreen(minLat, minLng, zoom)
-	xOffset := minX - 50
+	zoom := 5500.0
+
+	markX, markY := gosailing.LatLngToScreen(*markLat, *markLng, zoom)
+
+	type locationXY struct {
+		x float64
+		y float64
+	}
+
+	locations := make([]locationXY, len(replayPoints))
+	var minX, minY, maxX, maxY float64
+	for i, p := range replayPoints {
+		x, y := gosailing.LatLngToScreen(p.Latitude, p.Longitude, zoom)
+		if *markLat != 0 && *markLng != 0 {
+			x, y = gosailing.RotatePoint(x, y, markX, markY, -medianWind)
+		}
+		replayPoints[i].CourseOverGround -= medianWind
+		replayPoints[i].TrueWindDirection -= medianWind
+		locations[i] = locationXY{x, y}
+		if i == 0 || x < minX {
+			minX = x
+		}
+		if i == 0 || y < minY {
+			minY = y
+		}
+		if i == 0 || x > maxX {
+			maxX = x
+		}
+		if i == 0 || y > maxY {
+			maxY = y
+		}
+	}
+
+	fmt.Printf("minX: %.2f, minY: %.2f, maxX: %.2f, maxY: %.2f\n", minX, minY, maxX, maxY)
+	xOffset := markX - maxWidth/2
 	yOffset := minY - 50
 
 	finished := false
@@ -117,30 +152,26 @@ func run() {
 				finished = true
 			} else {
 				d := replayPoints[currentIndex]
+				l := locations[currentIndex]
 				currentIndex++
 
 				canvas.Clear()
 
-				x, y := gosailing.LatLngToScreen(d.Latitude, d.Longitude, zoom)
-
-				gosailing.DrawBoat(canvas, x-xOffset, y-yOffset, d.CourseOverGround)
-				gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection+45+180, colornames.Red)
-				gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection-45+180, colornames.Green)
-				gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.CourseOverGround+180, colornames.Gray)
+				gosailing.DrawBoat(canvas, l.x-xOffset, l.y-yOffset, d.CourseOverGround)
+				gosailing.LayLine(canvas, l.x-xOffset, l.y-yOffset, d.TrueWindDirection+45+180, colornames.Red)
+				gosailing.LayLine(canvas, l.x-xOffset, l.y-yOffset, d.TrueWindDirection-45+180, colornames.Green)
+				gosailing.LayLine(canvas, l.x-xOffset, l.y-yOffset, d.CourseOverGround+180, colornames.Gray)
 
 				gosailing.DrawWindDirection(canvas, 1024-50, 768-50, d.TrueWindDirection)
 
 				// draw track
 				trackCanvas.Color = colornames.Blueviolet
-				trackCanvas.Push(pixel.V(x-xOffset, y-yOffset))
+				trackCanvas.Push(pixel.V(l.x-xOffset, l.y-yOffset))
 				trackCanvas.Circle(1, 1)
 
-				if *markLat != 0 && *markLng != 0 {
-					x, y := gosailing.LatLngToScreen(*markLat, *markLng, zoom)
-					gosailing.DrawFlag(canvas, x-xOffset, y-yOffset)
-					gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection+45, colornames.Red)
-					gosailing.LayLine(canvas, x-xOffset, y-yOffset, d.TrueWindDirection-45, colornames.Green)
-				}
+				gosailing.DrawFlag(canvas, markX-xOffset, markY-yOffset)
+				gosailing.LayLine(canvas, markX-xOffset, markY-yOffset, d.TrueWindDirection+45, colornames.Red)
+				gosailing.LayLine(canvas, markX-xOffset, markY-yOffset, d.TrueWindDirection-45, colornames.Green)
 
 				time.Sleep(50 * time.Millisecond)
 			}

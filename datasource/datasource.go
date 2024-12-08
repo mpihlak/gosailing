@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"log"
 	"sort"
 	"strconv"
 	"time"
@@ -60,11 +61,13 @@ func NewReplayNavigationDataProvider(reader io.Reader, startTime, endTime *time.
 func (r *ReplayNavigationDataProvider) assignFieldValue(record []string, key string, target *float64) bool {
 	fieldPos, ok := r.fieldMap[key]
 	if !ok {
+		log.Printf("field %s not found", key)
 		return false
 	}
 
 	val, err := strconv.ParseFloat(record[fieldPos], 64)
 	if err != nil {
+		log.Printf("error parsing field %s: %v", key, err)
 		return false
 	}
 
@@ -98,11 +101,13 @@ func (r *ReplayNavigationDataProvider) getNextValidRecord() ([]string, time.Time
 		r.pos++
 
 		if timeFieldPos >= len(record) {
+			log.Printf("timeFieldPos: %d, record: %v", timeFieldPos, record)
 			return nil, time.Time{}, false
 		}
 
 		parsedTime, err := time.Parse(time.RFC3339, record[timeFieldPos])
 		if err != nil {
+			log.Printf("error parsing time: %v", err)
 			return nil, time.Time{}, false
 		}
 
@@ -129,7 +134,8 @@ func (r *ReplayNavigationDataProvider) Next() (NavigationDataPoint, bool) {
 	//
 
 	ok = r.assignFieldValue(record, "hdg", &result.Heading) &&
-		r.assignFieldValue(record, "stw", &result.SpeedThroughWater) &&
+		// TODO: stw is not available in all data, handle this
+		//r.assignFieldValue(record, "stw", &result.SpeedThroughWater) &&
 		r.assignFieldValue(record, "twa", &result.TrueWindAngle) &&
 		r.assignFieldValue(record, "tws", &result.TrueWindSpeed) &&
 		r.assignFieldValue(record, "twd", &result.TrueWindDirection) &&
