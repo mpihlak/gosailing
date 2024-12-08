@@ -80,33 +80,8 @@ func run() {
 		return false
 	}
 
-	var replayPoints []datasource.NavigationDataPoint
-	for {
-		d, ok := replayData.Next()
-		if !ok {
-			break
-		}
-		replayPoints = append(replayPoints, d)
-	}
-
-	// Calculate lat/lon bounds from replay points
-	minLat, maxLat := replayPoints[0].Latitude, replayPoints[0].Latitude
-	minLng, maxLng := replayPoints[0].Longitude, replayPoints[0].Longitude
-
-	for _, p := range replayPoints {
-		if p.Latitude < minLat {
-			minLat = p.Latitude
-		}
-		if p.Latitude > maxLat {
-			maxLat = p.Latitude
-		}
-		if p.Longitude < minLng {
-			minLng = p.Longitude
-		}
-		if p.Longitude > maxLng {
-			maxLng = p.Longitude
-		}
-	}
+	replayPoints := replayData.GetAllPoints()
+	minLat, _, minLng, _ := datasource.GetBounds(replayPoints)
 
 	zoom := 14000.0
 	minX, minY := gosailing.LatLngToScreen(minLat, minLng, zoom)
@@ -128,6 +103,7 @@ func run() {
 			paused = !paused
 		}
 		if keyPressed(pixel.KeyR) {
+			trackCanvas.Clear()
 			currentIndex = 0
 			finished = false
 		}
@@ -146,6 +122,10 @@ func run() {
 				x, y := gosailing.LatLngToScreen(d.Latitude, d.Longitude, zoom)
 
 				gosailing.DrawBoat(canvas, x-xOffset, y-yOffset, -d.CourseOverGround)
+				gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection+45+180, colornames.Green)
+				gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection-45+180, colornames.Red)
+				gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.CourseOverGround+180, colornames.Olive)
+
 				gosailing.DrawWindDirection(canvas, 1024-50, 768-50, d.TrueWindDirection)
 
 				// draw track
@@ -159,6 +139,8 @@ func run() {
 					gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection+45, colornames.Green)
 					gosailing.LayLine(canvas, x-xOffset, y-yOffset, -d.TrueWindDirection-45, colornames.Red)
 				}
+
+				time.Sleep(50 * time.Millisecond)
 			}
 		}
 

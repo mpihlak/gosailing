@@ -139,3 +139,53 @@ func (r *ReplayNavigationDataProvider) Next() (NavigationDataPoint, bool) {
 
 	return result, ok
 }
+
+// GetAllPoints returns all navigation data points in the replay data
+func (r *ReplayNavigationDataProvider) GetAllPoints() []NavigationDataPoint {
+	var points []NavigationDataPoint
+	// Store current position so we can restore it
+	currentPos := r.pos
+	// Reset position to start
+	r.pos = 0
+
+	for {
+		d, ok := r.Next()
+		if !ok {
+			break
+		}
+		points = append(points, d)
+	}
+
+	// Restore original position
+	r.pos = currentPos
+	return points
+}
+
+// GetBounds returns the minimum and maximum latitude and longitude values from a slice of navigation points
+func GetBounds(points []NavigationDataPoint) (minLat, maxLat, minLng, maxLng float64) {
+	if len(points) == 0 {
+		return 0, 0, 0, 0
+	}
+
+	minLat = points[0].Latitude
+	maxLat = points[0].Latitude
+	minLng = points[0].Longitude
+	maxLng = points[0].Longitude
+
+	for _, p := range points[1:] {
+		if p.Latitude < minLat {
+			minLat = p.Latitude
+		}
+		if p.Latitude > maxLat {
+			maxLat = p.Latitude
+		}
+		if p.Longitude < minLng {
+			minLng = p.Longitude
+		}
+		if p.Longitude > maxLng {
+			maxLng = p.Longitude
+		}
+	}
+
+	return minLat, maxLat, minLng, maxLng
+}
