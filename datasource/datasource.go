@@ -18,6 +18,7 @@ type NavigationDataPoint struct {
 	Latitude           float64
 	Longitude          float64
 	CumulativeDistance float64
+	CourseOverGround   float64
 }
 
 type NavigationDataProvider interface {
@@ -88,12 +89,12 @@ func (r *ReplayNavigationDataProvider) getNextValidRecord() ([]string, time.Time
 	}
 
 	for r.pos < len(r.records) {
-		record := r.records[r.pos]
-		r.pos++
-
 		if r.pos >= len(r.records) {
 			return nil, time.Time{}, false
 		}
+
+		record := r.records[r.pos]
+		r.pos++
 
 		if timeFieldPos >= len(record) {
 			return nil, time.Time{}, false
@@ -133,7 +134,8 @@ func (r *ReplayNavigationDataProvider) Next() (NavigationDataPoint, bool) {
 		r.assignFieldValue(record, "twd", &result.TrueWindDirection) &&
 		r.assignFieldValue(record, "lat", &result.Latitude) &&
 		r.assignFieldValue(record, "lng", &result.Longitude) &&
-		r.assignFieldValue(record, "cum_dist", &result.CumulativeDistance)
+		r.assignFieldValue(record, "cum_dist", &result.CumulativeDistance) &&
+		r.assignFieldValue(record, "cog", &result.CourseOverGround)
 
 	return result, ok
 }
