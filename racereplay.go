@@ -176,16 +176,18 @@ func (rr *RaceReplay) Update(win *opengl.Window) {
 		fmt.Fprintf(basicTxt, "Sailed distance:  %.2f\n", rr.boat.GetSailedDistance())
 		fmt.Fprintf(basicTxt, "Distance to mark: %.2f\n", distanceToMark)
 
-		twd := -rr.raceCourse.windDirection
-		if twd < 0 {
-			twd = 360 + twd
-		}
-		fmt.Fprintf(basicTxt, "TWD: %03.0f\n", twd)
 		hdg := -rr.boat.heading
 		if hdg < 0 {
 			hdg += 360
 		}
 		fmt.Fprintf(basicTxt, "HDG: %03.0f\n", hdg)
+		twd := -rr.raceCourse.windDirection
+		if twd < 0 {
+			twd = 360 + twd
+		}
+		fmt.Fprintf(basicTxt, "TWD: %03.0f\n", twd)
+		fmt.Fprintf(basicTxt, "TWA: %03.0f\n", navData.TrueWindAngle)
+		fmt.Fprintf(basicTxt, "TWS: %03.0f\n", navData.TrueWindSpeed)
 		basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 
 		if rr.paused {

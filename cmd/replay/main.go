@@ -95,10 +95,24 @@ func run() {
 		if keyPressed(pixel.KeyR) {
 			rr.StartReplay()
 		}
+		if keyPressed(pixel.Key1) {
+			rr.IncreaseSpeed()
+		}
+		if keyPressed(pixel.Key2) {
+			rr.DecreaseSpeed()
+		}
+		if keyPressed(pixel.KeyL) {
+			rr.ToggleLaylines()
+		}
+		if keyPressed(pixel.KeyW) {
+			rr.ToggleWindDirection()
+		}
 
 		win.Clear(colornames.Lightblue)
 		rr.Update(win)
 		win.Update()
+
+		rr.Throttle()
 	}
 }
 
