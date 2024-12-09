@@ -33,6 +33,10 @@ func (tp *TrackPlotter) PlotLocation(x, y float64) {
 	}
 }
 
+func (tp *TrackPlotter) Clear() {
+	tp.track.Clear()
+}
+
 func (tp *TrackPlotter) Drawable() *imdraw.IMDraw {
 	return tp.track
 }

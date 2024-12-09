@@ -8,6 +8,7 @@ import (
 	"golang.org/x/image/colornames"
 )
 
+// DrawFlag draws a flag for the mark
 func DrawFlag(canvas *imdraw.IMDraw, x, y float64) {
 	canvas.Color = colornames.Orangered
 	canvas.Push(pixel.V(x, y), pixel.V(x, y+10))
@@ -20,8 +21,8 @@ func DrawFlag(canvas *imdraw.IMDraw, x, y float64) {
 	canvas.Circle(2, 2)
 }
 
+// DrawBoat draws a little triangle for the boat
 func DrawBoat(canvas *imdraw.IMDraw, x, y, heading float64) {
-	// Draw a little triangle for the boat
 	canvas.Color = colornames.Darkblue
 	// bow
 	bowX, bowY := RotatePoint(x, y+7.5, x, y, heading)
@@ -37,13 +38,15 @@ func DrawBoat(canvas *imdraw.IMDraw, x, y, heading float64) {
 	canvas.Polygon(2)
 }
 
+// LayLine draws a line from the specified point to the specified heading
 func LayLine(canvas *imdraw.IMDraw, x, y, heading float64, color color.RGBA) {
 	canvas.Color = color
-	starboardX, starboardY := RotatePoint(x, 0, x, y, heading)
-	canvas.Push(pixel.V(x, y), pixel.V(starboardX, starboardY))
+	laylineX, laylineY := RotatePoint(x, y-1000, x, y, heading)
+	canvas.Push(pixel.V(x, y), pixel.V(laylineX, laylineY))
 	canvas.Line(2)
 }
 
+// DrawWindDirection draws a wind direction indicator - a circle with an arrow inside it
 func DrawWindDirection(canvas *imdraw.IMDraw, x, y, heading float64) {
 	windDirection := heading
 

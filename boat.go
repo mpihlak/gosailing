@@ -3,7 +3,6 @@ package gosailing
 import (
 	"math"
 
-	"github.com/gopxl/pixel/v2"
 	"github.com/gopxl/pixel/v2/ext/imdraw"
 	"golang.org/x/image/colornames"
 )
@@ -66,6 +65,14 @@ func (b *Boat) GetXY() (float64, float64) {
 	return b.currentX, b.currentY
 }
 
+func (b *Boat) SetLocation(x, y, heading, windDirection float64) {
+	b.sailedDistance += math.Hypot(b.currentX-x, b.currentY-y)
+	b.currentX = x
+	b.currentY = y
+	b.heading = heading
+	b.windDirection = windDirection
+}
+
 func (b *Boat) GetSailedDistance() float64 {
 	return b.sailedDistance
 }
@@ -73,33 +80,12 @@ func (b *Boat) GetSailedDistance() float64 {
 func (b *Boat) Drawable() *imdraw.IMDraw {
 	b.boat.Clear()
 
-	// Draw a little triangle for the boat
-	b.boat.Color = colornames.Darkblue
-	// bow
-	bowX, bowY := RotatePoint(b.currentX, b.currentY+7.5, b.currentX, b.currentY, b.heading)
-	b.boat.Push(pixel.V(bowX, bowY))
-	// aft starboard corner
-	sbX, sbY := RotatePoint(b.currentX+5, b.currentY-7.5, b.currentX, b.currentY, b.heading)
-	b.boat.Push(pixel.V(sbX, sbY))
-	// aft port corner
-	pX, pY := RotatePoint(b.currentX-5, b.currentY-7.5, b.currentX, b.currentY, b.heading)
-	b.boat.Push(pixel.V(pX, pY))
-	// back to bow
-	b.boat.Push(pixel.V(bowX, bowY))
-	b.boat.Polygon(2)
+	DrawBoat(b.boat, b.currentX, b.currentY, b.heading)
 
-	// Starboard layline
 	if b.laylines {
-		b.boat.Color = colornames.Green
-		sbLayLineX, sbLayLineY := RotatePoint(b.currentX, b.currentY+1000, b.currentX, b.currentY, b.windDirection-TackAngle)
-		b.boat.Push(pixel.V(b.currentX, b.currentY), pixel.V(sbLayLineX, sbLayLineY))
-		b.boat.Line(2)
-
-		// Port layline
-		b.boat.Color = colornames.Red
-		portLayLineX, portLayLineY := RotatePoint(b.currentX, b.currentY+1000, b.currentX, b.currentY, b.windDirection+TackAngle)
-		b.boat.Push(pixel.V(b.currentX, b.currentY), pixel.V(portLayLineX, portLayLineY))
-		b.boat.Line(2)
+		LayLine(b.boat, b.currentX, b.currentY, b.windDirection+TackAngle+180, colornames.Red)
+		LayLine(b.boat, b.currentX, b.currentY, b.windDirection-TackAngle+180, colornames.Green)
+		LayLine(b.boat, b.currentX, b.currentY, b.heading+180, colornames.Gray)
 	}
 
 	return b.boat

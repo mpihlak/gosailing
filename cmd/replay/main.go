@@ -2,14 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/gopxl/pixel/v2"
 	"github.com/gopxl/pixel/v2/backends/opengl"
-	"github.com/gopxl/pixel/v2/ext/imdraw"
 	"github.io/mpihlak/gosailing"
 	"github.io/mpihlak/gosailing/datasource"
 	"golang.org/x/image/colornames"
@@ -18,9 +16,6 @@ import (
 const (
 	maxWidth  = 1024.0
 	maxHeight = 768.0
-
-	boatLocationX = maxWidth / 2
-	boatLocationY = 25
 )
 
 var (
@@ -85,100 +80,24 @@ func run() {
 		return false
 	}
 
-	replayPoints := replayData.GetAllPoints()
-
-	medianWind := datasource.MedianWindDirection(replayPoints)
-	fmt.Printf("Median wind direction: %.2f\n", medianWind)
-
-	markX, markY := gosailing.LatLngToScreen(*markLat, *markLng, *zoomLevel)
-
-	type locationXY struct {
-		x float64
-		y float64
+	rr, err := gosailing.NewRaceReplay(*markLat, *markLng, maxWidth, maxHeight, *zoomLevel, replayData)
+	if err != nil {
+		log.Fatalf("Unable to create race replay: %v", err)
 	}
-
-	locations := make([]locationXY, len(replayPoints))
-	var minX, minY, maxX, maxY float64
-	for i, p := range replayPoints {
-		x, y := gosailing.LatLngToScreen(p.Latitude, p.Longitude, *zoomLevel)
-		if *markLat != 0 && *markLng != 0 {
-			x, y = gosailing.RotatePoint(x, y, markX, markY, -medianWind)
-		}
-		replayPoints[i].CourseOverGround -= medianWind
-		replayPoints[i].TrueWindDirection -= medianWind
-		locations[i] = locationXY{x, y}
-		if i == 0 || x < minX {
-			minX = x
-		}
-		if i == 0 || y < minY {
-			minY = y
-		}
-		if i == 0 || x > maxX {
-			maxX = x
-		}
-		if i == 0 || y > maxY {
-			maxY = y
-		}
-	}
-
-	fmt.Printf("minX: %.2f, minY: %.2f, maxX: %.2f, maxY: %.2f\n", minX, minY, maxX, maxY)
-	xOffset := markX - maxWidth/2
-	yOffset := minY - 50
-
-	finished := false
-	paused := false
-	currentIndex := 0
-	canvas := imdraw.New(nil)
-	trackCanvas := imdraw.New(nil)
 
 	for !win.Closed() {
 		if keyPressed(pixel.KeyQ) || keyPressed(pixel.KeyEscape) {
 			break
 		}
 		if keyPressed(pixel.KeySpace) || keyPressed(pixel.KeyP) {
-			paused = !paused
+			rr.TogglePause()
 		}
 		if keyPressed(pixel.KeyR) {
-			trackCanvas.Clear()
-			currentIndex = 0
-			finished = false
-		}
-		if paused {
-			time.Sleep(100 * time.Millisecond)
-		} else if !finished {
-			if currentIndex >= len(replayPoints) {
-				log.Printf("Replay data source finished")
-				finished = true
-			} else {
-				d := replayPoints[currentIndex]
-				l := locations[currentIndex]
-				currentIndex++
-
-				canvas.Clear()
-
-				gosailing.DrawBoat(canvas, l.x-xOffset, l.y-yOffset, d.CourseOverGround)
-				gosailing.LayLine(canvas, l.x-xOffset, l.y-yOffset, d.TrueWindDirection+45+180, colornames.Red)
-				gosailing.LayLine(canvas, l.x-xOffset, l.y-yOffset, d.TrueWindDirection-45+180, colornames.Green)
-				gosailing.LayLine(canvas, l.x-xOffset, l.y-yOffset, d.CourseOverGround+180, colornames.Gray)
-
-				gosailing.DrawWindDirection(canvas, 1024-50, 768-50, d.TrueWindDirection)
-
-				// draw track
-				trackCanvas.Color = colornames.Blueviolet
-				trackCanvas.Push(pixel.V(l.x-xOffset, l.y-yOffset))
-				trackCanvas.Circle(1, 1)
-
-				gosailing.DrawFlag(canvas, markX-xOffset, markY-yOffset)
-				gosailing.LayLine(canvas, markX-xOffset, markY-yOffset, d.TrueWindDirection+45, colornames.Red)
-				gosailing.LayLine(canvas, markX-xOffset, markY-yOffset, d.TrueWindDirection-45, colornames.Green)
-
-				time.Sleep(50 * time.Millisecond)
-			}
+			rr.StartReplay()
 		}
 
 		win.Clear(colornames.Lightblue)
-		canvas.Draw(win)
-		trackCanvas.Draw(win)
+		rr.Update(win)
 		win.Update()
 	}
 }
