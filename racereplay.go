@@ -79,12 +79,13 @@ func NewRaceReplay(markLat, markLng, maxWidth, maxHeight, zoomLevel float64, rep
 	return &RaceReplay{
 		raceCourse: NewRaceCourse(markX-xOffset, markY-yOffset, p.TrueWindDirection),
 		replayData: replayDataPoints,
-		boat:       NewBoat(p.x-xOffset, p.y-yOffset, p.TrueWindDirection),
-		track:      NewTrackPlotter(markX-xOffset, markY-yOffset),
-		delayMs:    50,
-		laylines:   true,
-		xOffset:    xOffset,
-		yOffset:    yOffset,
+		// TODO: Boat starts with incorrect sailed distance, fix this
+		boat:     NewBoat(p.x-xOffset, p.y-yOffset, p.TrueWindDirection),
+		track:    NewTrackPlotter(markX-xOffset, markY-yOffset),
+		delayMs:  50,
+		laylines: true,
+		xOffset:  xOffset,
+		yOffset:  yOffset,
 	}, nil
 }
 
@@ -93,6 +94,7 @@ func (rr *RaceReplay) StartReplay() {
 	rr.started = true
 	rr.finished = false
 	rr.track.Clear()
+	rr.boat.Reset()
 }
 
 func (rr *RaceReplay) IsFinished() bool {
@@ -188,6 +190,9 @@ func (rr *RaceReplay) Update(win *opengl.Window) {
 		fmt.Fprintf(basicTxt, "TWD: %03.0f\n", twd)
 		fmt.Fprintf(basicTxt, "TWA: %03.0f\n", navData.TrueWindAngle)
 		fmt.Fprintf(basicTxt, "TWS: %03.0f\n", navData.TrueWindSpeed)
+		fmt.Fprintf(basicTxt, "AWS: %03.0f\n", navData.ApparentWindSpeed)
+		fmt.Fprintf(basicTxt, "AWA: %03.0f\n", navData.ApparentWindAngle)
+		fmt.Fprintf(basicTxt, "SOG: %03.2f\n", navData.SpeedOverGround)
 		basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 
 		if rr.paused {

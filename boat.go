@@ -31,6 +31,14 @@ func NewBoat(currentX, currentY, windDirection float64) *Boat {
 	}
 }
 
+func (b *Boat) Reset() {
+	b.sailedDistance = 0
+	b.currentX = 0
+	b.currentY = 0
+	b.heading = 0
+	b.windDirection = 0
+}
+
 func (b *Boat) SetWindDirection(direction float64) {
 	b.windDirection = direction
 

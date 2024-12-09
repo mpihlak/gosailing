@@ -21,6 +21,9 @@ type NavigationDataPoint struct {
 	Longitude          float64
 	CumulativeDistance float64
 	CourseOverGround   float64
+	SpeedOverGround    float64
+	ApparentWindSpeed  float64
+	ApparentWindAngle  float64
 }
 
 type NavigationDataProvider interface {
@@ -139,10 +142,13 @@ func (r *ReplayNavigationDataProvider) Next() (NavigationDataPoint, bool) {
 		r.assignFieldValue(record, "twa", &result.TrueWindAngle) &&
 		r.assignFieldValue(record, "tws", &result.TrueWindSpeed) &&
 		r.assignFieldValue(record, "twd", &result.TrueWindDirection) &&
+		r.assignFieldValue(record, "aws", &result.ApparentWindSpeed) &&
+		r.assignFieldValue(record, "awa", &result.ApparentWindAngle) &&
 		r.assignFieldValue(record, "lat", &result.Latitude) &&
 		r.assignFieldValue(record, "lng", &result.Longitude) &&
 		r.assignFieldValue(record, "cum_dist", &result.CumulativeDistance) &&
-		r.assignFieldValue(record, "cog", &result.CourseOverGround)
+		r.assignFieldValue(record, "cog", &result.CourseOverGround) &&
+		r.assignFieldValue(record, "sog", &result.SpeedOverGround)
 
 	return result, ok
 }
