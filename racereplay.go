@@ -193,6 +193,7 @@ func (rr *RaceReplay) Update(win *opengl.Window) {
 		fmt.Fprintf(basicTxt, "AWS: %03.0f\n", navData.ApparentWindSpeed)
 		fmt.Fprintf(basicTxt, "AWA: %03.0f\n", navData.ApparentWindAngle)
 		fmt.Fprintf(basicTxt, "SOG: %03.2f\n", navData.SpeedOverGround)
+		fmt.Fprintf(basicTxt, "STW: %03.2f\n", navData.SpeedThroughWater)
 		basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 
 		if rr.paused {
