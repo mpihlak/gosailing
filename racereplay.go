@@ -196,7 +196,7 @@ func (rr *RaceReplay) Update(win *opengl.Window) {
 		fmt.Fprintf(basicTxt, "STW: %03.2f\n", navData.SpeedThroughWater)
 		basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 
-		if rr.paused {
+		if rr.paused && !rr.finished {
 			textX := windowBounds.Center().X
 			textY := windowBounds.Center().Y
 			pauseBanner := "Paused, press SPACE to unpause"
@@ -216,10 +216,6 @@ func (rr *RaceReplay) Update(win *opengl.Window) {
 
 			basicTxt.Color = colornames.Darkblue
 			fmt.Fprintf(basicTxt, "TOTAL DISTANCE: %.2f\n", rr.boat.GetSailedDistance()+distanceToMark)
-			if currentBoatX < rr.raceCourse.MarkX {
-				basicTxt.Color = colornames.Red
-				fmt.Fprintln(basicTxt, "Wrong side of the mark!")
-			}
 			basicTxt.Draw(win, pixel.IM.Scaled(basicTxt.Orig, 2))
 		}
 
