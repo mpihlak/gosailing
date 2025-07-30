@@ -20,3 +20,12 @@ Go 1.23 was used during development, though any fairly recent version should do 
 ```bash
 go run ./cmd/gosailing
 ```
+
+The default is to have an oscillating wind. Use `windShiftRate` and `windShiftAmplitude` parameters to control
+the rate and amplitude of the shift.
+
+The example below creates what looks like a persistent right shift (use negative rate to get a left shift).
+
+```
+go run cmd/gosailing/main.go -windShiftRate 0.05 -windShiftAmplitude 0.1
+```
